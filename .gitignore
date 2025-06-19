@@ -1,0 +1,8 @@
+nextflow
+.nextflow
+.nextflow.log*
+.vscode
+work/
+results
+workspace.code-workspace
+bin/*

@@ -1,7 +1,6 @@
 version = "2.15.0"
 container_url = "ncbi/blast:${version}"
 
-//params.hbvdb = ""
 process dl_hbvdb {
   container = "${container_url}"
   label "small_mem_mono_cpus"
@@ -13,7 +12,6 @@ process dl_hbvdb {
   input:
     
   output:
-    //tuple val(params.hbvdb), path("*.fasta"), emit: reference_db
     path("*.fasta"), emit: reference_db
 
   script:
@@ -23,19 +21,12 @@ process dl_hbvdb {
     link = "https://hbvdb.lyon.inserm.fr/data/nucleic/fasta/${params.hbvdb}_Genomes.fas"
     output_name = "${params.hbvdb}_Genomes.fasta"
   }
-  /*
-  else if(params.hbvdb == "hdvdb"){
-    link = 
-    output_name = "${params.hbvdb}_Genomes.fasta"
-  }
-  */
 """
 wget --quiet --no-check-certificate -O ${output_name} ${link}
 """
 }
 
 
-//params.makeblastdb_out = ""
 process makeblastdb {
   container = "${container_url}"
   label "big_mem_multi_cpus"

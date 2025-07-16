@@ -63,7 +63,8 @@ def help() {
                                       Default: "cuda:all"
     --minimap [str]                   During variant calling, medaka already performs reads alignment using minimap2. To perform additionnal aligment with minimap2 use "align".
                                       Default: "skip".
-             
+    --reads_number [int]              To specify the number of reads that will be sampled for the BLAST alignment.
+                                      Default: 100.
 
     Help:
       --help | --h                    Display this help message.
@@ -273,12 +274,6 @@ include { vcf_filter as filtervcf1 } from './nf_modules/vcflib/1.0.13/main.nf' p
 include { vcf_filter as filtervcf2 } from './nf_modules/vcflib/1.0.13/main.nf' params(vcf_filter_out: '23_de_novo_vcf_filter_out/')
 
 
-// TEST FOR HAPLOTYPING
-include { medaka_consenus } from './nf_modules/medaka/2.0.1/main.nf'
-include { rv_haplo } from './nf_modules/rvhaplo/3.0/main.nf'
-include { bam2sam } from './nf_modules/samtools/1.20/main.nf'
-include { strainline } from './nf_modules/strainline/1.0/main.nf'
-include { bam2fasta } from './nf_modules/samtools/1.20/main.nf'
 /*
  ****************************************************************
                           Workflow
@@ -288,8 +283,8 @@ workflow {
 
 // *****File Collection*****
 
-  //Multiplexed samples fast5
-  if ( params.kit_barcoding != '' && params.fast5 != '' ) {
+  // Multiplexed FAST5 
+  if ( params.skipBC  == false &&  params.fast5 != '' ) {
     pod5convert(fast5_input)
     basecalling(pod5convert.out.pod5)
     demux(basecalling.out.basecalled)
@@ -301,8 +296,8 @@ workflow {
                                     .set { ready_fastq }
   }
 
-// Multiplexed samples pod5
-  else if ( params.kit_barcoding != '' && params.pod5 != '' ) {
+// Multiplexed POD5
+  else if ( params.skipBC  == false && params.pod5 != '' ) {
     basecalling(pod5_input)
     demux(basecalling.out.basecalled)
     demux.out.demuxed.collect()
@@ -313,31 +308,31 @@ workflow {
                                     .set { ready_fastq }
   }
 
-// Multiplexed samples fastq
-  else if ( params.kit_barcoding != '' && params.pod5 == '' && params.fast5 == '' ) {
+// Multiplexed  FASTQ
+  else if ( params.skipBC  == false && params.pod5 == '' && params.fast5 == '' ) {
     demux(fastq_input)
     demux.out.demuxed.flatten()
                            .map { it -> [it.getSimpleName(), it] }
                            .set { ready_fastq }
   }
 
-// Single sample fast5
-  else if ( params.kit_barcoding == '' && params.fast5 != '' ) {
+// Non-multiplexed FAST5
+  else if ( params.skipBC  == true && params.fast5 != '' ) {
     pod5convert(fast5_input)
     basecalling_nobc(pod5convert.out.pod5)
     basecalling_nobc.out.basecalled_nobc.map { it -> [it.getSimpleName(), it] }
                                                .set { ready_fastq }
   }
 
-// Single sample pod5
-  else if ( params.kit_barcoding == '' && params.pod5 != '' ) {
+// Non-mutliplexed POD5
+  else if ( params.skipBC  == true && params.pod5 != '' ) {
     basecalling_nobc(pod5_input)
     basecalling_nobc.out.basecalled_nobc.map { it -> [it.getSimpleName(), it] }
                                                .set { ready_fastq }
   }
   
 
-// Single sample fastq  --> Pre-processing
+// Non-mutliplexed FASTQ  --> Pre-processing
 
 
 //***********************Pre-processing**********************
@@ -351,8 +346,6 @@ workflow {
  pick_fw_primer(ready_fastq, params.fwprimer, 'fw')
 
  pick_rv_primer(pick_fw_primer.out.filtered_fastq, params.rvprimer, 'rv')
-
-
 
  filterbylength(pick_rv_primer.out.filtered_fastq, pick_rv_primer.out.filtered_tsv)
 

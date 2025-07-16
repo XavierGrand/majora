@@ -1,0 +1,53 @@
+FROM ubuntu:22.04
+
+# Installation des dépendances de base
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    libbz2-dev \
+    liblzma-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    pkg-config \
+    zlib1g-dev \
+    wget \
+    autoconf \
+    automake \
+    libtool \
+    curl \
+    g++ \
+    make \
+    python3-dev \
+    python3-pip \
+    pybind11-dev \
+    pandoc
+
+#Installation de htslib
+RUN git clone https://github.com/samtools/htslib.git /htslib && \
+    cd /htslib && \
+    git submodule update --init --recursive && \
+    make && \
+    make install
+
+#Installation de WFA
+RUN git clone https://github.com/smarco/WFA.git && \
+    cd WFA && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DOPENMP=1 .. && \
+    cmake --build . --parallel && \
+    make install && \
+    ldconfig
+
+
+#Installation de vcflib
+RUN git clone --recursive https://github.com/vcflib/vcflib.git && \ 
+    cd vcflib && \
+    git checkout v1.0.14 && \
+    mkdir -p build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Debug -DZIG=OFF -DOPENMP=OFF .. && \
+    cmake --build . && \
+    cmake --install . && \
+    ldconfig
+
+CMD ["bash"]

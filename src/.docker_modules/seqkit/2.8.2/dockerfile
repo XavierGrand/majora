@@ -1,0 +1,1 @@
+FROM xgrand/seqkit:2.8.2

@@ -1,8 +1,11 @@
 nextflow
-.nextflow
+.nextflow*
 .nextflow.log*
 .vscode
 work/
-results
+work/*
+results/*
 workspace.code-workspace
 bin/*
+.Rhistory
+

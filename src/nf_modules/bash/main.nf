@@ -1,5 +1,5 @@
-version = "1.0"
-container_url = "lousahra/index_vcf:${version}"
+version = "1.1"
+container_url = "lousahra/reindex_vcf:${version}"
 
 process reindex_vcf {
   container = "${container_url}"

@@ -119,6 +119,7 @@ results/
 Brief presentation of what each directory contains:
 
 **01_pod5convert**
+
 Contains fast5 data, this directory will store the resulting pod5 file after conversion
 
 **02_basecalling and 02_basecalling_nobc**
@@ -129,21 +130,27 @@ Contains fast5 data, this directory will store the resulting pod5 file after con
   If the input data are NOT barcoded, the basecalled sequences from pod5 file are stored in this folder.
 
 **03_demux**
+
 Contains a bam file for each demultiplexed sample, along with a summary file. The summary lists each sequence ID and its corresponding sample. Sequences that could not be assigned to any sample are grouped under "unclassified".
 
 **04_read_stats**
+
 Contains a tab separated file for each sample that stores data related to sequences length and number.
 
 **05_convertfastq**
+
 Contains on fastq file for each sample.
 
 **06_grep_primer**
+
 Contains a folder for each sample with compressed fastq file of reads containg primer sequences in their sequence. It also contains a file with informations about the authorized calculated mismatch for each primer and a summary that stores data related to sequences length and number for filtered sequences.
 
 **07_filterbylength**
+
 Each sample contains a compressed fastq file of reads that match the calculated length limits. It also includes a text file xoth the calculated limits dans a summary file with that calculated limits and a summary file that stores data on sequences lengths and the number of filtered sequences.
 
 **08_sample_fastq**
+
 A subset of 100 reads (default but this value can be modified) for each sample is used for the BLAST alignment. This folder contains the subset reads fasta file.
 
 **09_dl_hbvdb & 10_make_ref_db**
@@ -154,12 +161,15 @@ A subset of 100 reads (default but this value can be modified) for each sample i
   If the user chose the parameter `--refdb`, a fasta file containing all the chosen sequences will be produced.
 
 **11_double_fastaref**
+
 Reference sequences are concatenated and the resulting fasta file is located in this folder.
 
 **12_makeblastdb**
+
 Files related to BLASTn database creation are stored in this folder.
 
 **13_blast_them_all**
+
 Contains three files for each sample:
 
 1. *hits.txt* lists all he hits from the BLASTn alignment against previously sampled sequences (08_sample_fastq).
@@ -167,27 +177,35 @@ Contains three files for each sample:
 3. *best__ref.txt* contains the reference sequence ID with the highest number of matching sequences.
 
 **14_extract_ref**
+
 Contains the fasta file with the sequence of the best hit from the BLASTn alignement.
 
 **15_quality_control**
+
 Contains pycoQC results.
 
 **16_call_hap_variant**
+
 Includes medaka variant caller results: a vcf file with detected variants, minmap2 alignment outputs (bam and bai files), along with the medaka log file.
 
 **17_annotate_variant**
+
 Contains the annotated medaka vcf file that stores  additional informations.
 
 **18_vcf_filter**
+
 Contains the annoted medaka vcf file with variations having a quality score of at least 20.
 
 **19_reindex_vcf**
+
 Because of experimental design (see explanation [here](./doc/reindexing_info.pdf)), variant positions must be reindexed. This folder contains the reindex vcf file.
 
 **22_lollipop_vcf**
+
 Contains graphical respresentations of detected variants for each sample.
 
 **report.html**
+
 Contains the nextflow report regarding the run.
 
 ## Authors

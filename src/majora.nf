@@ -36,7 +36,7 @@ def help() {
 
     Nanopore basecalling:
       --skipBC [boolean]              Use if input data are not multiplxed. Thus, dorado basecalling will perform trimming. 
-                                      Default is "true"
+                                      Default is "false"
 
       --kit_barcoding [str]           To provide Nanopore barcoding kit. 
                                       No default.
@@ -56,6 +56,13 @@ def help() {
     --hbvdb  [str]                    Should be followed by either "all" or the uppercase letter corresponding to the desired genotype.
                                       
     --ref_user [path]                 To provide fasta/multifasta file containg hbvdb sequences.
+
+    Advanced parameters:
+    --blasthreads [int]               To specify the number of CPU threads to use for faster parallel processing during BLAST alignment.
+    --cuda [str]                      To specify how many GPUs should be used during basecalling. Should follow this synthax: "cuda:<all/integer>".
+                                      Default: "cuda:all"
+    --minimap [str]                   During variant calling, medaka already performs reads alignment using minimap2. To perform additionnal aligment with minimap2 use "align".
+                                      Default: "skip".
              
 
     Help:
@@ -94,7 +101,7 @@ params.primerloc = ''
 params.ref_user = ''
 params.ref_db = ''
 params.rvprimer = 'CGCAGACCAATTTATGCCTAC' // Denomination P4(1783-1803)
-params.skipBC = true
+params.skipBC = false
 params.sort_bam = ""
 params.minimap = "skip"
 
@@ -194,34 +201,31 @@ if (params.ref_db != '') {
 */
 // ********** FILE COLLECTION CONDITIONAL IMPORTS *******************
 
-  // FAST5 + Barcoding = TRUE
-  if (params.kit_barcoding &&  params.fast5 != '') {
+  // Multiplexed FAST5 
+  if (params.skipBC  == false &&  params.fast5 != '') {
   include { pod5convert } from './nf_modules/dorado/0.8.2/main.nf'
   include { basecalling } from './nf_modules/dorado/0.8.2/main.nf'
   include { demux } from './nf_modules/dorado/0.8.2/main.nf'
   include { convertfastq } from './nf_modules/bedtools/2.25.0/main.nf'
   }
-  // FAST5 + Barcoding = FALSE
-  if (!params.kit_barcoding &&  params.fast5 != '') {
+  // Non-mutiplexed FAST5
+  if (params.skipBC  == true &&  params.fast5 != '') {
   include { pod5convert } from './nf_modules/dorado/0.8.2/main.nf'
   include { basecalling_nobc } from './nf_modules/dorado/0.8.2/main.nf'
   }
-  // POD5 + Barcoding = TRUE
-  else if (params.kit_barcoding && params.pod5 != '') {
+  // Multiplexed POD5
+  else if (params.skipBC  == false && params.pod5 != '') {
   include { basecalling } from './nf_modules/dorado/0.8.2/main.nf'
   include { demux } from './nf_modules/dorado/0.8.2/main.nf'
   include { convertfastq } from './nf_modules/bedtools/2.25.0/main.nf'
     }
-  // POD5 + Barcoding = FALSE
-  else if (!params.kit_barcoding && params.pod5 != '') {
+  // Non-mutiplexed POD5
+  else if (params.skipBC  == true && params.pod5 != '') {
   include { basecalling_nobc } from './nf_modules/dorado/0.8.2/main.nf'
   }
 
-  // FASTQ or FQ + Barcoding = TRUE
-  // VERSION UTILISATEUR PEU ATTENTIF
-  //else if ( params.kit_barcoding && params.file_type == "fastq" || params.file_type == "fastq.gz" || params.file_type == "fq") || params.file_type == "fq.gz"{
-  //}
-  else if (params.kit_barcoding && params.pod5 == '' && params.fast5 == '') {
+  // Multiplexed FASTQ or FQ  
+  else if (params.skipBC  == false && params.pod5 == '' && params.fast5 == '') {
   include { demux } from './nf_modules/dorado/0.8.2/main.nf'
   }
 
@@ -242,7 +246,7 @@ include { blast_them_all  } from './nf_modules/blast/2.15.0/main.nf'
 include { extractref } from './nf_modules/seqkit/2.8.2/main.nf'
 include { index_fasta  } from './nf_modules/samtools/1.20/main.nf'
 
-if (params.minimap != 'skip') {
+if (params.minimap == 'align') {
   include { mapping_hbv_genome } from './nf_modules/minimap2/2.28/main.nf'
   include { filter_bam_mapped } from './nf_modules/samtools/1.20/main.nf'
   include { sort_bam } from './nf_modules/samtools/1.20/main.nf'
@@ -386,7 +390,7 @@ workflow {
 
 
 //*********************** Filter mapping results *****************
-if ( params.minimap != 'skip' ) {
+if ( params.minimap == 'align' ) {
   //********************** Align reads on reference sequence ************
  mapping_hbv_genome (filterbylength.out.length_filtered_fastq.combine(extractref.out.referenceseq, by: 0))
  filter_bam_mapped(mapping_hbv_genome.out.bam)

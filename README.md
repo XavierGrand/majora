@@ -2,8 +2,6 @@
   <img src="./images/majora_title.svg" alt="majora_title" width="50%" height="50%">
 </div>
 
----
-
 Majora is a nextflow pipeline for genotyping and caracterizing variants of Hepatitis B viruses from MinION sequencing reads. The pipeline supports raw FAST5/POD5 files dans FASTQ inputs and performs basecalling, demultiplexing, BLAST, *de novo* assembly and variant calling. In addition, it also outputs graphs for variations visualization.
 
 ## Pipeline summary

@@ -1,9 +1,9 @@
 version = "1.0"
 container_url = "lousahra/pycoqc:${version}"
+
 // Version for numpy : 1.24.14 last version using numpy.uint64 before switching to numpy.uint32 accordind to the following stackoverflow post :
 // https://bioinformatics.stackexchange.com/questions/23229/pycoqc-n50-is-zero-or-null-overflow-encountered-in-scalar-add
 // Newer versions (released afer 1.26.14) cause a "overflow encountered in scalar add" error that stops the process
-
 
 process qualitycontrol {
   container = "${container_url}"

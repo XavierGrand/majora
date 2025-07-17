@@ -38,7 +38,7 @@ process basecalling {
 
     output:
     path ("basecalled/basecalled.bam"), emit : basecalled
-// ATTENTION A RECHANGER LES BAM EN FASTQ
+// Files are kept in bam because demultiplexing bam files is more has been more efficient than demultiplexing fastq.
     script:
     """
     dorado basecaller \
@@ -67,7 +67,6 @@ process basecalling_nobc {
     path ("basecalled_nobc/*.fastq"), emit : basecalled_nobc // a vérifier si un ou plsueiurs fastq
 
     script:
-    // Voir avec Xavier si on emit en bam ou en fastq
     """
     dorado basecaller \
            --device ${params.cuda} \

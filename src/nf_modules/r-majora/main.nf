@@ -18,6 +18,7 @@ process lollipop_vcf {
   script:
     """
   mkdir ${barcode}
+  # Check if file exists or is empty before plotting anything
  if [ ! -f ${tsv} ] || [ ! -s ${tsv} ]; then
     touch empty.txt
     echo "The vcf file from ${barcode} was empty" > empty.txt

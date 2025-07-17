@@ -29,6 +29,7 @@ process call_hap_variant {
 """
 }
 
+// Process needed to add elements into INFO field of VCF file. These informations are needed to calculate variations frequencies.
 process annotate_variant {
   container = "${container_url}"
   label "big_mem_mono_cpus"

@@ -1,6 +1,7 @@
 version = "2.25.0"
 container_url = "lbmc/bedtools:${version}"
 
+// Demultiplexing in done using bam files to maintain barcoding efficiency, thus bam demultiplexed files are converted into fastq files before filtration.
 process convertfastq {
   container = "${container_url}"
   label "small_mem_multi_cpus"

@@ -25,11 +25,5 @@ process mapping_hbv_genome {
    
   
   """
-  // Found in doc: -S
-  //Ignored for compatibility with previous samtools versions. Previously this option was required if input was in SAM format, but now the correct format is automatically detected by examining the first few characters of input. 
-
-  // -F4
-  // filter the alignments that will be included in the output to only those alignments that match certain criteria
-  // Do not output alignments with any bits set in FLAG present in the FLAG field
 }
 

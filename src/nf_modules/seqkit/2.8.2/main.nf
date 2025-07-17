@@ -14,8 +14,6 @@ process doublefastaref {
 
   output:
     tuple val(params.hbvdb), path("doubled/${fasta.baseName}_doubled.fasta"), emit: doubledfasta
-  // to concatenate sequences with same ID from multiple files     
-
 
   script:
     """
@@ -47,7 +45,7 @@ process extractref {
     echo "multifasta: ${multifasta}"
     mkdir ${barcode}
     seqkit grep -r -f ${bestref} ${multifasta} -o ${barcode}/${barcode}_toMap.fasta
-    #adding -r to enable partly matching
+    #added -r to enable partly matching
     """
 }
 
@@ -74,6 +72,7 @@ process grep_primer {
     cd ${barcode}/
     echo "mismatch allowed to ${primerloc} primer search: ${length}" > ${barcode}_${primerloc}_mismatch.txt
     echo ${primer} >> primer.txt
+
     #Find sequences that respect authorized mismatch length
     seqkit grep -i -f primer.txt -m ${length} ../${ready_fastq} -o ${barcode}_${primerloc}_filtered.fastq -j ${task.cpus}
    
@@ -110,8 +109,13 @@ process filterbylength {
     """
     mkdir ${barcode}
     cd ${barcode}/
-    minlength=\$(awk -F '\t' 'NR==3{A=\$7} END {res=int((A*0.9)); print res}' ../${tsv})
-    maxlength=\$(awk -F '\t' 'NR==3{B=\$7} END {res=int((B*1.1)); print res}' ../${tsv})
+
+    # minlength equals 90% of average primer filtered sequence length
+    minlength=\$(awk -F '\t' 'NR==3{A=\$7} END {res=int((A*0.9)); print res}' ../${tsv}) 
+
+    # maxlength equals 110% of average primer filtered sequence length
+    maxlength=\$(awk -F '\t' 'NR==3{B=\$7} END {res=int((B*1.1)); print res}' ../${tsv}) 
+    
     echo "Calculated minimal length is: \$minlength bp and calculated maximal length is: \$maxlength bp" > length.txt
     
     seqkit seq --min-len \$minlength --max-len \$maxlength --remove-gaps ../${fastq} -j ${task.cpus} > ${barcode}_length_filtered.fastq        

@@ -59,6 +59,7 @@ def help() {
 
     Advanced parameters:
     --blasthreads [int]               To specify the number of CPU threads to use for faster parallel processing during BLAST alignment.
+                                      Default: 18.
     --cuda [str]                      To specify how many GPUs should be used during basecalling. Should follow this synthax: "cuda:<all/integer>".
                                       Default: "cuda:all"
     --minimap [str]                   During variant calling, medaka already performs reads alignment using minimap2. To perform additionnal aligment with minimap2 use "align".
@@ -86,6 +87,7 @@ if (params.help || params.h) {
                    Default Parameters
 ********************************************************
 */
+
 /**** Params in ****/
 params.blasthreads = 18
 params.cuda = "cuda:all"
@@ -105,6 +107,7 @@ params.rvprimer = 'CGCAGACCAATTTATGCCTAC' // Denomination P4(1783-1803)
 params.skipBC = false
 params.sort_bam = ""
 params.minimap = "skip"
+params.reads_number = 100
 
 /**** Params out ****/
 params.pod5convert_out = '01_pod5convert/'
@@ -188,7 +191,7 @@ if (params.ref_user != '') {
     .set { user_ref }
 }
 
-// TO use a csv file containing reference sequences ID from hbvdb
+// To use a csv file containing reference sequences ID from hbvdb
 if (params.ref_db != '') {
   Channel
     .fromPath(params.ref_db)
@@ -231,6 +234,7 @@ if (params.ref_db != '') {
   }
 
    // FASTQ or FQ + Barcoding = FALSE
+
 // ********** PRE PROCESSING IMPORTS *******************
 
 include { read_stats } from './nf_modules/seqkit/2.8.2/main.nf'
@@ -246,6 +250,7 @@ include { makerefdb  } from './nf_modules/blast/2.15.0/main.nf'
 include { blast_them_all  } from './nf_modules/blast/2.15.0/main.nf'
 include { extractref } from './nf_modules/seqkit/2.8.2/main.nf'
 include { index_fasta  } from './nf_modules/samtools/1.20/main.nf'
+
 
 if (params.minimap == 'align') {
   include { mapping_hbv_genome } from './nf_modules/minimap2/2.28/main.nf'
@@ -340,20 +345,19 @@ workflow {
 // If multiple single sample fastq files provided need to concatenate in one single file
 // Add process concatenate from banjul_xgrand
 
-// Filter primers
-
+// Reads statistics before filtering
  read_stats(ready_fastq)
+
+// Reads filtering on primer + on length
  pick_fw_primer(ready_fastq, params.fwprimer, 'fw')
-
  pick_rv_primer(pick_fw_primer.out.filtered_fastq, params.rvprimer, 'rv')
-
  filterbylength(pick_rv_primer.out.filtered_fastq, pick_rv_primer.out.filtered_tsv)
 
-
-  // take a sample of 100 sequences from reads
+// Randomly draw filtered reads for BLAST alignment (Default = 100 reads)
  sample_fastq(filterbylength.out.length_filtered_fastq)
 
-//***********************Download / upload reference **********************
+
+//***********************Download / upload reference depending on used option **********************
 
   if ( params.ref_db !== '' ) {
       makerefdb(ref_db)
@@ -374,17 +378,13 @@ workflow {
 //*********************** Blast **********************
  makeblastdb(doublefastaref.out.doubledfasta)
  blast_them_all(sample_fastq.out.sampled_fastq, makeblastdb.out.blastdb.collect())
-/*
+
 //*********************** Extract best results and corresponding reference sequence **********************
  extractref(blast_them_all.out.bestref, doublefastaref.out.doubledfasta.collect())
  //index_fasta(extractref.out.referenceseq)
 
-
-
-
-//*********************** Filter mapping results *****************
+//*********************** Optionnal alignment with minimap2 *****************
 if ( params.minimap == 'align' ) {
-  //********************** Align reads on reference sequence ************
  mapping_hbv_genome (filterbylength.out.length_filtered_fastq.combine(extractref.out.referenceseq, by: 0))
  filter_bam_mapped(mapping_hbv_genome.out.bam)
  sort_bam(filter_bam_mapped.out.bam)
@@ -394,14 +394,21 @@ if ( params.minimap == 'align' ) {
 
 
  //********************** Variant calling *************
-
  vc1(extractref.out.referenceseq.combine(filterbylength.out.length_filtered_fastq, by: 0))
+
+ // To get additionnal informations about variations. These will be used to calculate variation frenquencies
  annotate_variant(vc1.out.vcf.combine(extractref.out.referenceseq, by: 0), vc1.out.calls, vc1.out.calls_idx)
+
+ // Filtering identified variation on quality (must be at least 20 to be kept) 
  filtervcf1(annotate_variant.out.annotated_vcf)
 
+ // Reindexing variations positions according to actual EcoRI cutting site
  reindex_vcf1(extractref.out.referenceseq.combine(blast_them_all.out.counthits, by: 0).combine(filtervcf1.out.vcf_filtered, by: 0), params.fwprimer, params.rvprimer)
+
+ // Visualization
  lollipop_vcf1(reindex_vcf1.out.tsv)
- */
+ 
+
  //********************* de novo assembly *************************
  /*
  de_novo_assembly(filterbylength.out.length_filtered_fastq)
@@ -412,18 +419,10 @@ if ( params.minimap == 'align' ) {
  reindex_vcf2(extractref.out.referenceseq.combine(blast_them_all.out.bestref, by: 0).combine(filtervcf2.out.vcf_filtered, by: 0), params.fwprimer, params.rvprimer)
  lollipop_vcf2(reindex_vcf2.out.tsv)
  */
-/* 
+ 
 if (params.pod5 != '' || params.fast5 != '' ) {
 qualitycontrol(vc1.out.calls.combine(vc1.out.calls_idx, by: 0).combine(demux.out.sequence_summary))
 }
-*/
 
-// TEST HAPLOTYPONG
-/*
-bam2sam(vc1.out.calls, vc1.out.calls_idx)
-medaka_consenus(vc1.out.calls.combine(reindex_vcf1.out.ref_fasta, by: 0))
-rv_haplo(bam2sam.out.sam.combine(medaka_consenus.out.consensus_fasta, by: 0))
-bam2fasta(vc1.out.calls)
-strainline(bam2fasta.out.fasta)
-*/
+
 }

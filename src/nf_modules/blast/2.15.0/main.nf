@@ -101,7 +101,7 @@ process makerefdb {
   output: 
   path("combined_ref.fasta"), emit: ref_db
   path("*.txt")
-// à tester sans le shebang
+
   script:
 """
   #!/usr/bin/bash 
@@ -118,6 +118,6 @@ process makerefdb {
     echo "" >> combined_ref.fasta
   done
   sed -i 's/>/>gnl|hbvnuc|/' combined_ref.fasta
- #rm temp*.txt
+  rm temp*.txt
 """
 }

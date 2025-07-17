@@ -44,12 +44,14 @@ The arguments of the pipeline are described in the table below:
 |           Argument           |                                                                                             Description                                                                                             |
 | :--------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 |              -c              |                                                                  Configuration file. This always should be `src/nextflow.config`                                                                  |
-|           -profile           | The profile to use. This can be**docker** or **singularity** to run the pipeline in docker or in singularity respectively. This can also be **psmn** or **charliecloud.**  |
-| --fastq or --fast5 or --pod5 |                                                                            Input folder with appropriate file extension.                                                                            |
-|          --fwprimer          |                                                                                      Sequece of forward primer                                                                                      |
-|         --revprimer         |                                                                                      Sequence of reverse primer                                                                                      |
-|           --hbvdb           |                                                                              Dowloads hbv genomic sequences from hvbdb                                                                              |
-|           --ref_db           |                                                                                  To upload user's csv database file                                                                                  |
+|           -profile           | The profile to use. This can be **docker** or **singularity** to run the pipeline in docker or in singularity respectively. This can also be **psmn** or **charliecloud.**  |
+| --fastq or --fast5 or --pod5 [path] |                                                                            Input folder with appropriate file extension.                                                                            |
+|          --fwprimer [str]         |                                                                                      Sequece of forward primer [str]                                                                                     |
+|         --revprimer [str]         |                                                                                      Sequence of reverse primer [str]                                                                                      |
+|           --hbvdb [str] or --ref_db [path] or --ref_user [path]         |                                                                              Dowloads hbv genomic sequences from hvbdb or uses user's provided sequences                                                                         |
+| --skipBC [boolean] | Performs trimming during dorado basecalling. To use if data are not multiplexed |
+| --kit_barcoding [str] | Nanopore barcoding kit |
+| --model [str] | Nanopore basecalling model (fast, hac or sup) |
 |          --help --h          |                                                                                       To display help message                                                                                       |
 
 

@@ -2,7 +2,7 @@
   <img src="./images/majora_title.svg" alt="majora_title" width="50%" height="50%">
 </div>
 
-Majora is a nextflow pipeline for genotyping and caracterizing variants of Hepatitis B viruses from MinION sequencing reads. The pipeline supports raw FAST5/POD5 files dans FASTQ inputs and performs basecalling, demultiplexing, BLAST, *de novo* assembly and variant calling. In addition, it also outputs graphs for variations visualization.
+Majora is a nextflow pipeline for genotyping and caracterizing variants of Hepatitis B viruses from MinION sequencing data. The pipeline supports raw FAST5/POD5 files and FASTQ inputs. It performs basecalling, demultiplexing, BLAST, *de novo* assembly and variant calling. In addition, it outputs graphs for variations visualization.
 
 ## Pipeline summary
 
@@ -28,10 +28,10 @@ git clone https://github.com/XavierGrand/majora.git
 
 ---
 
-The pipeline `src/majora.nf` works a nextflow configuration file `src/nextflow.config`.
+The pipeline `src/majora.nf` works with a nextflow configuration file `src/nextflow.config`.
 The standard command for running the pipeline starts with:
 `nextflow ./src/majora.nf -c ./src/nextflow.config -profile <profile>`
-Followed with the appropriate input parameter which depends of the input type:
+Followed with the appropriate input parameter which depends on the input type:
 
 - `--fast5 <path_for_fast5>`
 - `--pod5 <path_for_pod5>`
@@ -63,15 +63,15 @@ The arguments of the pipeline are described in the table below:
 
 ---
 
-The pipeline uses references for genotyping samples using BLASTn. The BLAST database can be generated using on of the three user-defined options, each corresponding to a specific option:
+The pipeline uses references for genotyping samples using BLASTn. The BLAST database can be generated using one of the three user-defined options, each corresponding to a specific option:
 
 - **Downloading sequences from HBVdb:**
   - **By genotype:**
     With the `--hbvdb` parameter, the user can select either all sequences from the HBV database or only those associated with a specific genotype. The user should specify either "all" (for the entire database) or the uppercase letter representig the desired genotype.
   - **By sequence identifiers:**
-    With the `--ref_db` option, the user will create a custom BLAST databse using specific sequence identifiers from HBV database. To do so, the option must be followed by a CSV (tab separated with header) file with sequences ID contained in the second column.
+    With the `--ref_db` option, the user will create a custom BLAST database using specific sequence identifiers from HBV database. To do so, the option must be followed by a CSV (tab separated with header) file with sequences ID contained in the second column.
 - **Using a custom multi-fasta file**:
-  For users who have pre-selected sequences, this option allows them to create a BLAST database directly from a multi-fasta file containing the chosen sequences of interest. To so do, the user should use the option `user_db` followed by the multi-fasta file path.
+  For users who have pre-selected sequences, this option allows them to create a BLAST database directly from a multi-fasta file containing the chosen sequences of interest. To do so, the user should use the option `user_db` followed by the multi-fasta file path.
 
 ## Inputs of Majora : Three cases
 
@@ -82,7 +82,7 @@ The pipeline can process three types of files :
 - Raw nanopore data with **pod5** or **fast5** extension
 - **Fastq** files from nanopore sequencing
 
-The input file must be associated with the corresponding option: `--fast5` or `--pod5` or `--fastq`.
+The input folder containing the files must be associated with the corresponding option: `--fast5` or `--pod5` or `--fastq`.
 
 ## Outputs of Majora
 
